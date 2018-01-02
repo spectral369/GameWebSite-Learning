@@ -1,0 +1,68 @@
+ <div id="register">
+   {{#if errors}}
+<script>
+    // Run on page load
+    window.onload = function() {
+
+       
+
+        // If values are not blank, restore them to the fields
+        var name = sessionStorage.getItem('name');
+        if (name !== null) $('#username').val(name);
+       
+       
+
+        var email = sessionStorage.getItem('email');
+        if (email !== null) $('#email').val(email);
+    }
+
+    // Before refreshing the page, save the form data to sessionStorage
+    window.onbeforeunload = function() {
+        sessionStorage.setItem('name', $('#username').val());
+        sessionStorage.setItem('email', $('#email').val());
+    }
+</script>
+
+{{/if}}
+     <form action="/register" method="POST" >
+       {{# if  erun}}
+  <span style="color:red;  vertical-align:middle;  text-align: center; width: 100%; display: block;margin : 0 auto;" >Username already in use</span>
+ {{else if erem}}
+ <span style="color:red;  vertical-align:middle;  text-align: center; width: 100%; display: block;margin : 0 auto;" >Email already in use</span>
+  {{/if}}
+<input type="text" pattern="([A-z0-9À-ž]).{3,}" id="username" name="username" placeholder="Username" required oninput="setCustomValidity(''); checkValidity(); setCustomValidity(validity.valid ? '' :'Minimum length is 4 characters!');" />
+{{#if errors}}
+ 
+  <label for="username">User Name:</label>
+
+ <script>
+  
+ document.getElementById("username").setCustomValidity("This username is already registered!");
+    
+  </script>
+  {{/if}}
+ <label for="password">Password:</label>
+<input type="password" pattern="([A-z0-9À-ž]).{5,}" id="password" name="password" placeholder="Password"  required oninput="setCustomValidity(''); checkValidity(); setCustomValidity(validity.valid ? '' :'Minimum length is 6 characters!');" />
+ <label for="password2">Re-type your Password:</label>
+<input type="password" id="password2" name="password2" placeholder="Password" required>
+<script>var password = document.getElementById("password")
+, confirm_password = document.getElementById("password2");
+
+function validatePassword(){
+if(password.value != confirm_password.value) {
+  confirm_password.setCustomValidity("Passwords Don't Match");
+} else {
+  confirm_password.setCustomValidity('');
+}
+}
+
+password.onchange = validatePassword;
+confirm_password.onkeyup = validatePassword;</script>
+<label for="email">Email:</label>
+<input type="email" id="email" name="email" placeholder="Email" required>
+<br>
+<input type="image" id="registerBtn" src="/images/Button2.png" border="0" alt="Register" />
+
+</form>
+
+ </div>

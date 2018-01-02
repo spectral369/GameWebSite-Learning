@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link rel="stylesheet" type="text/css" href="/stylesheets/admin.css">
+   <!--<link href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" rel="stylesheet">-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{{title}}</title>
+</head>
+<body>
+<div id="he"><button type="button" id="bb" onclick="javascript:history.back()">&#8592;</button> </div>
+<div id="he1"><h1 id="ht">Admin Panel</h1></div>
+<br>
+<input type="text" id="search" placeholder="Cauta dupa username!">
+<input type="button" id="ser" value="Search">
+<table id="result">
+<tr>
+    <th id="id">ID</th>
+    <th id="un">Username</th>
+    <th id="eml">Email</th>
+    <th id="date">Register Date</th>
+    <th id="ban">Ban</th>
+    <th id="description">Description</th>
+</tr>
+</table>
+
+
+
+<script type="text/javascript">
+
+
+$(document).ready(function(){
+$('#ser').click(function(){
+  
+    var searchTxt =  $('#search').val();
+   
+    if(searchTxt ===''){
+        return;
+    }else{
+    
+        $.ajax({
+    url: '/moderator/ser',
+    type: 'POST',
+    data: JSON.stringify({
+                       txt:searchTxt
+                }),
+    datatype: "json", 
+     contentType: 'application/json; charset=utf-8',
+    success: function(data) {
+       var d = JSON.parse(data);
+   $('#result tr').not(':first').remove();
+       if(data.indexOf("err") !== -1){
+       
+                  var  html ="<tr><td id='err' colspan='6'>'A aparut o eroare!'</td></tr>";
+  $('#result tr').first().after(html);
+            }
+            else if(data.indexOf("nous") !== -1){
+                     var  html ="<tr><td id='err' colspan='6'>'Userul nu a fost gasit!!'</td></tr>";
+  $('#result tr').first().after(html);
+            }
+            else{
+      
+                               var html = '';
+ 
+     html +="<tr>"+
+    "<td id='id'>"+d.id+"</td>"+
+    "<td id='un1'>"+d.username+"</td>"+
+    "<td id='eml'>"+d.email+"</td>"+
+    "<td id='date'>"+d.rdate+"</td>"+
+    "<td id='ban1'><span id='btxt'>"+d.ban.isBanned+
+        "</span></td>"+
+    "<td id='description1'>"+d.ban.reason+"</td>"+
+"</tr>";
+  
+$('#result tr').first().after(html);
+
+
+  
+            }
+            
+    }
+        });
+    }
+});
+});
+
+
+</script>
+</body>
+</html>

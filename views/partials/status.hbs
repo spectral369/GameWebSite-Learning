@@ -1,0 +1,50 @@
+ <div id="imgNews">
+adasdasdasdasdnaskndkasndkasd
+asdasdlamsdlamsda<br>askdalsdl;askd;ask;das;dasdasdklaslkda;
+<br>
+Mysql status: <div id="changeText" ></div><br>
+Forum status: <div id="forumSts" ></div>
+<script type="text/javascript">
+
+(function worker() {
+  $.ajax({
+    url: '/update',
+    datatype: "json", 
+    success: function(data) {
+      var da = $.parseJSON(data);
+    
+      if(da.mysql){
+       
+        if( $('#changeText').hasClass('led-red'))
+        $('#changeText').removeClass('led-red');
+      $('#changeText').addClass('led-green');
+     } else{
+       if( $('#changeText').hasClass('led-green'))
+        $('#changeText').removeClass('led-green');
+      $('#changeText').addClass('led-red');
+
+     }
+   if(da.forumSts){
+        if( $('#forumSts').hasClass('led-red'))
+        $('#forumSts').removeClass('led-red');
+      $('#forumSts').addClass('led-green');
+     } else {
+      
+       if( $('#forumSts').hasClass('led-green'))
+        $('#forumSts').removeClass('led-green');
+      $('#forumSts').addClass('led-red');
+
+     }
+    },
+    complete: function() {
+      // Schedule the next request when the current one's complete
+      setTimeout(worker, 15000);
+    }
+  });
+})();
+
+
+            
+</script>
+
+ </div>

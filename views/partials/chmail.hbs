@@ -1,0 +1,33 @@
+ <div id="imgNews">
+<form action="/chMail" method="POST">
+{{#if wp}}
+<span style="color:red;  vertical-align:middle;  text-align: center; width: 100%; display: block;margin : 0 auto;" >Wrong current password! </span>
+{{else if erre}}
+<span style="color:red;  vertical-align:middle;  text-align: center; width: 100%; display: block;margin : 0 auto;" >Error inserting into DB </span>
+{{/if}}
+    <label for="currpassword">Current password:</label>
+    <input type="password" id="currpassword" name="currpassword" placeholder="Current Password" required>
+ <label for="oldmail">Current mail:</label>
+<input type="email" id="oldmail" name="oldmail" placeholder="Current Mail" required>
+ <label for="newmail">Type your new Email:</label>
+<input type="email" id="newmail" name="newmail" placeholder="New Email" required>
+<script>var oldmail = document.getElementById("oldmail")
+, newmail = document.getElementById("newmail");
+
+function validateemail(){
+if(oldmail.value != newmail.value) {
+   confirm_password.setCustomValidity('');
+} else {
+ 
+  confirm_password.setCustomValidity("Emails cannot be the same");
+}
+}
+
+oldmail.onchange = validateemail;
+newmail.onkeyup = validateemail;
+</script>
+<input type="image" id="registerBtn" src="/images/Button2.png" border="0" alt="Change Email" />
+</form>
+
+
+ </div>

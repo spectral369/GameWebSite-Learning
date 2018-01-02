@@ -1,0 +1,22 @@
+<div id="loginBox">
+  
+ {{#if pUp}}
+ <span id="pupdated" style="color:green;  vertical-align:middle;  text-align: center; width: 100%; display: block;margin : 0 auto;" >Password Updated ! </span>
+ {{else if eUp}}
+ <span id="pupdated" style="color:green;  vertical-align:middle;  text-align: center; width: 100%; display: block;margin : 0 auto;" >Email Updated ! </span>
+ {{/if}}
+    <div id="loginSucc">
+       <a href="/chpass"><img src="/images/chPass.png" id="registerImg"></a> 
+       <a href="/chmail"> <img src="/images/chEmail.png" id="registerImg"></a> 
+       {{#if admin}}
+        
+        <a href="/admin/"><img src="/images/userControl.png" id="registerImg"></a>
+        {{else if moderator}}
+            <a href="/moderator/"><img src="/images/userControl.png" id="registerImg"></a>
+       {{/if}}
+          <div id="logout"><a href="/logout"><img src="/images/lgout.png" id="lgoutImg"></a></div>
+       
+       
+    </div>
+
+</div>
