@@ -1,6 +1,6 @@
 
 var config = function () {};
-
+var df = require('./dataInfo.js');
 var bcrypt = require('bcrypt');
 var mongoose = require("mongoose");
 var moment = require('moment');
@@ -13,8 +13,7 @@ config.passport = passport;
 var request = require('request');
 config.request = request;
 
-
-mongoose.connection.openUri('mongodb://root:4dark@localhost/test3?authSource=admin');
+mongoose.connection.openUri('mongodb://'+df.mongoSite.username+':'+df.mongoSite.password+'@'+df.mongoSite.host+'/'+df.mongoSite.db+'?authSource=admin');
 const isReachable = require('is-reachable');
 config.isReachable =  isReachable;
 var CryptoJS = require("crypto-js");
@@ -156,11 +155,14 @@ function(req, username, password, done) {
 
 var mysql      = require('mysql');
 config.mysql = mysql;
+
+//port??
 config.connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'root',
-  password : '4dark',
-  database : 'sames'
+  host     : df.mysql.host,
+  user     : df.mysql.username,
+  password : df.mysql.password,
+  database : df.mysql.db,
+  port     : df.mysql.port
 });
 //needs testing...
 config.connection.connect(function(err) {
@@ -253,16 +255,19 @@ return UserData.findOne({ 'token' : token}, function(err, user) {
       (req.connection.socket ? req.connection.socket.remoteAddress : null);
       req.session.user = config.randomString(64,ip);
 
-     var t  =  moment(user.createDate).add((30 * 24 * 60 * 60 * 1000),'seconds');
+     var t  =  moment(user.createDate).add(30,'days');
+     console.log(t.calendar());
+     console.log(moment(Date.now()).calendar());
      var secondsDiff = t.diff(Date.now(), 'seconds');
       if(secondsDiff<=0){
         console.log('cookie expired!');
         res.clearCookie('remember_me');
         res.redirect('/');
       }
-  
-     console.log('exp: '+t+' diff: '+secondsDiff);
-      res.cookie('remember_me', req.session.user,{ path: '/', httpOnly: true, expires:secondsDiff, maxAge: secondsDiff});
+      console.log(secondsDiff);
+     console.log(' diff: '+secondsDiff/ 86400);
+     ///why is the name of Clam Lord  maxAge is in milliseconds ???/????
+      res.cookie('remember_me', req.session.user,{ path: '/', httpOnly: true, expires:new Date(Date.now() + secondsDiff), maxAge:(secondsDiff*1000.0)});
 
 
 

@@ -81,7 +81,7 @@ router.post('/login',function(req,res,next){
      
       }
     else{
-        req.session.cookie.expires = false;
+        req.session.cookie.expires = true;///orig =false
       }
       req.session.user = token;
       conf.UserData.findOne({ 'username' :  req.body.inputUser }, function(err, user) {
