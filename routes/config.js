@@ -165,11 +165,15 @@ config.connection = mysql.createConnection({
   port     : df.mysql.port
 });
 //needs testing...
-config.connection.connect(function(err) {
-  if(err)
-  console.log(err);
- console.log('conn...');
 
+config.connection.connect(function(err) {
+  if(err){
+  console.log(err);
+  config.isMysql=false;
+  }else{
+ console.log('conn...');
+ config.isMysql=true;
+  }
 });
 
 
@@ -195,20 +199,20 @@ function test2(name) {
   }
   config.isAuthenticated = function (req,res,next) {
 //function isAuthenticated(req,res,next){
-  if(req.session.user!=undefined)
-  return  test2(req.session.user)
+  if(req.session.token!=undefined)
+  return  test2(req.session.token)
   .then(function(token) {
 
   
      
       var isLog = false;
-      if(req.session.user!= undefined || req.session.user===token){
+      if(req.session.token!= undefined || req.session.token===token){
           isLog=true;
       }
       else if(req.cookies.remember_me === token){
           isLog=true;
       }
-     else if(token===-1 && req.session.user== undefined ){
+     else if(token===-1 && req.session.token== undefined ){
         isLog=false;
       }
     /* if(token==='banned'){
@@ -224,13 +228,13 @@ function test2(name) {
   .then(function(token) {
    
       var isLog = false;
-      if(req.session.user!= undefined && req.session.user===token){
+      if(req.session.token!= undefined && req.session.token===token){
           isLog=true;
       }
       else if(req.cookies.remember_me === token){
           isLog=true;
       }
-     else if(token===-1 && req.session.user== undefined  ){
+     else if(token===-1 && req.session.token== undefined  ){
         isLog=false;
       }
      /* if(token==='banned'){
@@ -239,7 +243,7 @@ function test2(name) {
         console.log('2nd banned');
         
         }*/
-      if(isLog && req.session.user === undefined){
+      if(isLog && req.session.token === undefined){
         console.log('inside renew token');
       
 ///test
@@ -253,7 +257,7 @@ return UserData.findOne({ 'token' : token}, function(err, user) {
       req.connection.remoteAddress || 
       req.socket.remoteAddress ||
       (req.connection.socket ? req.connection.socket.remoteAddress : null);
-      req.session.user = config.randomString(64,ip);
+      req.session.token = config.randomString(64,ip);
 
      var t  =  moment(user.createDate).add(30,'days');
      console.log(t.calendar());
@@ -267,18 +271,20 @@ return UserData.findOne({ 'token' : token}, function(err, user) {
       console.log(secondsDiff);
      console.log(' diff: '+secondsDiff/ 86400);
      ///why is the name of Clam Lord  maxAge is in milliseconds ???/????
-      res.cookie('remember_me', req.session.user,{ path: '/', httpOnly: true, expires:new Date(Date.now() + secondsDiff), maxAge:(secondsDiff*1000.0)});
+      res.cookie('remember_me', req.session.token,{ path: '/', httpOnly: true, expires:new Date(Date.now() + secondsDiff), maxAge:(secondsDiff*1000.0)});
 
 
 
 
-    var a = req.session.user.split('.');
+    var a = req.session.token.split('.');
       var bytes  = CryptoJS.AES.decrypt(a[1].toString(), 'Game$');
       var plaintext = bytes.toString(CryptoJS.enc.Utf8);
     var b = user.token.split(".");
     var bytes1  = CryptoJS.AES.decrypt(b[1].toString(), 'Game$');
     var plaintext1 = bytes.toString(CryptoJS.enc.Utf8);
     
+    req.session.user = user.username;
+
     if(plaintext!=plaintext1){
     isLog=false;
     res.clearCookie('remember_me');
@@ -291,7 +297,7 @@ return UserData.findOne({ 'token' : token}, function(err, user) {
       req.session.moderator = user.moderator;
       
       UserData.update({'token': token}, {
-        'token':req.session.user,
+        'token':req.session.token,
     }, function(err, numberAffected, rawResponse) {
        if(err)
        console.log('err '+err);
@@ -317,6 +323,10 @@ return UserData.findOne({ 'token' : token}, function(err, user) {
 }
 
 
+process.on('ECONNREFUSED', (reason, p) => {
+  console.log('ECONNREFUSED: Promise', p, 'reason:', reason);
+  // application specific logging, throwing an error, or other logic here
+});
 process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
   // application specific logging, throwing an error, or other logic here

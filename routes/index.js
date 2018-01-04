@@ -1,13 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var conf = require('./config.js');
-//require('./config.js')();
-
-var toBeForumReg={
-  /*  username,
-    password,
-    email,*/
-}
 
 var contor = 0;
 
@@ -19,7 +12,9 @@ router.get('/', function(req, res, next) {
     if(isLoggedin) {
       res.render('index', { 
         title: 'GameWebSite',
+        usern:req.session.user,
         condition:true,
+        usern:req.session.user,
         anyArray:[1,2,3],
         admin:req.session.admin,
         moderator:req.session.moderator
@@ -55,6 +50,7 @@ router.post('/login',function(req,res,next){
     req.logIn(username, function(err) {
       if (err) { return next(err); }
      // console.log('is'+username);
+    
       if(username.ban.isBanned){
         //res.clearCookie('remember_me');//test
         res.send('this user is baneed!');
@@ -83,23 +79,26 @@ router.post('/login',function(req,res,next){
     else{
         req.session.cookie.expires = true;///orig =false
       }
-      req.session.user = token;
+      req.session.token = token;
       conf.UserData.findOne({ 'username' :  req.body.inputUser }, function(err, user) {
         // if there are any errors, return the error
         if (err)
             return done('admin err: '+err);
-         req.session.admin=user.admin;
+       //  req.session.admin=user.admin;
+     
        if(user.admin || user.moderator ){
 
         req.session.save();
         res.render('index',{
         title: 'GameWebSite',
         condition:true,
+        usern:req.session.user,
         admin: user.admin,
         moderator:user.moderator
       });
       req.session.admin=user.admin;
       req.session.moderator = user.moderator;
+      req.session.user= user.username;
        }
       
        else{
@@ -107,6 +106,7 @@ router.post('/login',function(req,res,next){
         res.render('index',{
         title: 'GameWebSite',
         condition:true,
+        usern:req.session.user,
         
       });
        }
@@ -130,6 +130,7 @@ router.post('/login',function(req,res,next){
       res.render('index', { 
         title: 'GameWebSite',
         condition:true,
+        usern:req.session.user,
         dwnl:true,
         admin:req.session.admin,
         moderator:req.session.moderator
@@ -171,6 +172,7 @@ router.get('/forgot',function(req,res,next){
       res.render('index', { 
         title: 'GameWebSite',
         condition:true,
+        usern:req.session.user,
         sts:true,
         admin:req.session.admin,
         moderator:req.session.moderator
@@ -200,58 +202,44 @@ conf.isReachable('localhost:4567').then(reachable => {
       database : 'sames'
     });
   }
-  if(conf.connection.state =="disconnected"){
-
-    conf.connection.connect(function(err) {
-      if(err)
-      console.log(err);
-     console.log('conn...');
-
-    });
-
-  }else 
-  if(conf.connection.state =="authenticated"){
-    var repon = {
-      mysql:true,
-      forumSts:reachable
-    }
-   
- 
-    res.end(JSON.stringify(repon))
-  }
-  else{
-    
-    conf.isMysql=false;
-   
+  conf.connection.on('error', function(err) {
     var repon = {
       mysql:false,
       forumSts:reachable
       
     }
-   
+    conf.isMysql=false;
     res.end(JSON.stringify(repon))
-  }
 
+  });
+  console.log(conf.connection.state);
+  if(/*conf.connection.state == "disconnected" || conf.connection.state==="ECONNREFUSED"*/!conf.isMysql){
 
-/*
-
-  conf.connection.connect(function(err) {
-
-
-    if (err) {
-      conf.isMysql=false;
+    conf.connection.connect(function(err) {
+      if(err){
       console.log(err);
+      conf.connection.end();
+      conf.isMysql=false;
       var repon = {
         mysql:false,
         forumSts:reachable
         
       }
-     
-     //connection.end();
       res.end(JSON.stringify(repon))
+      }else{
+     console.log('conn...');
+     conf.isMysql=true;
+     var repon = {
+      mysql:true,
+      forumSts:reachable
       
     }
-    else{
+    res.end(JSON.stringify(repon))
+      }
+    });
+
+  }else 
+  if(conf.connection.state == "authenticated"){
     var repon = {
       mysql:true,
       forumSts:reachable
@@ -260,12 +248,6 @@ conf.isReachable('localhost:4567').then(reachable => {
  
     res.end(JSON.stringify(repon))
   }
-});
-  */
-
-
- 
-
  
 })
 
@@ -370,6 +352,7 @@ router.get('/chpass',function(req,res,next){
       res.render('index', { 
         title: 'GameWebSite',
         condition:true,
+        usern:req.session.user,
         fgpass:true,
         admin:req.session.admin,
         moderator:req.session.moderator
@@ -399,6 +382,7 @@ router.post('/chPass',function(req,res,next){
           res.render('index', { 
             title: 'GameWebSite',
             condition:true,
+            usern:req.session.user,
             fgpass:true,
             wp:true,
             admin:req.session.admin,
@@ -410,6 +394,7 @@ router.post('/chPass',function(req,res,next){
         res.render('index', { 
           title: 'GameWebSite',
           condition:true,
+          usern:req.session.user,
           fgpass:true,
           sp:true,
           admin: req.session.admin,
@@ -430,6 +415,7 @@ else
       res.render('index', { 
         title: 'GameWebSite',
         condition:true,
+        usern:req.session.user,
         chmail:true,
         erre:true,
         admin:req.session.admin,
@@ -441,6 +427,7 @@ else
     res.render('index', { 
       title: 'GameWebSite',
       condition:true,
+      usern:req.session.user,
       pUp:true,
       admin:req.session.admin,
       moderator:req.session.moderator
@@ -460,6 +447,7 @@ router.get('/chmail',function(req,res,next){
       res.render('index', { 
         title: 'GameWebSite',
         condition:true,
+        usern:req.session.user,
         chmail:true,
         admin:req.session.admin,
         moderator:req.session.moderator
@@ -489,6 +477,7 @@ router.post('/chMail',function(req,res,next){
           res.render('index', { 
             title: 'GameWebSite',
             condition:true,
+            usern:req.session.user,
             chmail:true,
             wp:true,
             admin:req.session.admin,
@@ -505,6 +494,7 @@ router.post('/chMail',function(req,res,next){
             res.render('index', { 
               title: 'GameWebSite',
               condition:true,
+              usern:req.session.user,
               chmail:true,
               erre:true
             
@@ -515,6 +505,7 @@ router.post('/chMail',function(req,res,next){
           res.render('index', { 
             title: 'GameWebSite',
             condition:true,
+            usern:req.session.user,
             eUp:true,
             admin:req.session.admin,
             moderator:req.session.moderator

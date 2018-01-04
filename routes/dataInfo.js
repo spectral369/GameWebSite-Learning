@@ -2,17 +2,17 @@
 var dataInfo = function () {};
 
 var mongoSite ={
-    username:'you know what to write here',
-    password:'you know what to write here',
-    host:'you know what to write here',
-    db:'you know what to write here',
+    username:'root',
+    password:'4dark',
+    host:'localhost',
+    db:'test3'
 }
 dataInfo.mongoSite = mongoSite;
 var mysql={
-    username:'you know what to write here',
-    password:'you know what to write here',
-    host:'you know what to write here',
-    db:'you know what to write here',
+    username:'root',
+    password:'4dark',
+    host:'localhost',
+    db:'sames',
     port:3306
 }
 dataInfo.mysql = mysql;

@@ -7,7 +7,7 @@ var conf = require('./config.js');
 
 
 router.get('/',function(req,res,next){
-    if(req.session.admin && req.session.user!=undefined)
+    if(req.session.admin && req.session.token!=undefined)
   res.render('admin',{
     title: 'M2 AP',
     
