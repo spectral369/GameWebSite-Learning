@@ -1,96 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <link rel="stylesheet" type="text/css" href="/stylesheets/admin.css">
-   <!--<link href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" rel="stylesheet">-->
+    <link rel="stylesheet" type="text/css" href="/stylesheets/admin.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{{title}}</title>
 </head>
+
 <body>
-<div id="he"><button type="button" id="bb" onclick="javascript:history.back()">&#8592;</button> </div>
-<div id="he1"><h1 id="ht">Admin Panel</h1></div>
-<br>
-<input type="text" id="search" placeholder="Cauta dupa username!">
-<input type="button" id="ser" value="Search">
-<table id="result">
-<tr>
-    <th id="id">ID</th>
-    <th id="un">Username</th>
-    <th id="eml">Email</th>
-    <th id="date">Register Date</th>
-    <th id="ban">Ban</th>
-    <th id="description">Description</th>
-</tr>
-</table>
+    <div id="he">
+        <button type="button" id="bb" onclick="javascript:history.back()">&#8592;</button>
+    </div>
+    <div id="he1">
+        <h1 id="ht">Admin Panel</h1>
+    </div>
+    <br>
+    <input type="text" id="search" placeholder="Cauta dupa username!">
+    <input type="button" id="ser" value="Search">
+    <input type="button" id="all" value="Show all" placeholder="It may take a while">
+    <table id="result">
+        <tr>
+            <th id="id">ID</th>
+            <th id="un">Username</th>
+            <th id="eml">Email</th>
+            <th id="date">Register Date</th>
+            <th id="ban">Ban</th>
+            <th id="description">Description</th>
+        </tr>
+    </table>
+    <div id="pag">
+        <nav>
+            <ul class="pagination"></ul>
+        </nav>
+    </div>
 
 
 
-<script type="text/javascript">
+    <script type="text/javascript">
 
 
-$(document).ready(function(){
-$('#ser').click(function(){
-  
-    var searchTxt =  $('#search').val();
-   
-    if(searchTxt ===''){
-        return;
-    }else{
-    
-        $.ajax({
-    url: '/moderator/ser',
-    type: 'POST',
-    data: JSON.stringify({
-                       txt:searchTxt
-                }),
-    datatype: "json", 
-     contentType: 'application/json; charset=utf-8',
-    success: function(data) {
-       var d = JSON.parse(data);
-   $('#result tr').not(':first').remove();
-       if(data.indexOf("err") !== -1){
-       
-                  var  html ="<tr><td id='err' colspan='6'>'A aparut o eroare!'</td></tr>";
-  $('#result tr').first().after(html);
-            }
-            else if(data.indexOf("nous") !== -1){
-                     var  html ="<tr><td id='err' colspan='6'>'Userul nu a fost gasit!!'</td></tr>";
-  $('#result tr').first().after(html);
-            }
-            else{
-      
-                               var html = '';
- 
-     html +="<tr>"+
-    "<td id='id'>"+d.id+"</td>"+
-    "<td id='un1'>"+d.username+"</td>"+
-    "<td id='eml'>"+d.email+"</td>"+
-    "<td id='date'>"+d.rdate+"</td>"+
-    "<td id='ban1'><span id='btxt'>"+d.ban.isBanned+
-        "</span></td>"+
-    "<td id='description1'>"+d.ban.reason+"</td>"+
-"</tr>";
-  
-$('#result tr').first().after(html);
+        $(document).ready(function () {
+            $('#ser').click(function () {
+
+                var searchTxt = $('#search').val();
+
+                if (searchTxt === '') {
+                    return;
+                } else {
+
+                    $.ajax({
+                        url: '/moderator/ser',
+                        type: 'POST',
+                        data: JSON.stringify({
+                            txt: searchTxt
+                        }),
+                        datatype: "json",
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            var d = JSON.parse(data);
+                            $('#result tr').not(':first').remove();
+                            if (data.indexOf("err") !== -1) {
+
+                                var html = "<tr><td id='err' colspan='6'>'A aparut o eroare!'</td></tr>";
+                                $('#result tr').first().after(html);
+                            }
+                            else if (data.indexOf("nous") !== -1) {
+                                var html = "<tr><td id='err' colspan='6'>'Userul nu a fost gasit!!'</td></tr>";
+                                $('#result tr').first().after(html);
+                            }
+                            else {
+
+                                var html = '';
+
+                                html += "<tr>" +
+                                    "<td id='id'>" + d.id + "</td>" +
+                                    "<td id='un1'>" + d.username + "</td>" +
+                                    "<td id='eml'>" + d.email + "</td>" +
+                                    "<td id='date'>" + d.rdate + "</td>" +
+                                    "<td id='ban1'><span id='btxt'>" + d.ban.isBanned +
+                                    "</span></td>" +
+                                    "<td id='description1'>" + d.ban.reason + "</td>" +
+                                    "</tr>";
+
+                                $('#result tr').first().after(html);
 
 
-  
-            }
-            
-    }
+
+                            }
+
+                        }
+                    });
+                }
+            });
         });
-    }
-});
-});
 
 
-</script>
+        $(document).ready(function () {
+            $('#all').click(function () {
+                $.ajax({
+                    url: '/admin/getall',
+                    type: 'POST',
+                    datatype: "json",
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+
+                        var d = JSON.parse(data);
+                        //alert(d[0]);
+
+                        $('#result tr').not(':first').remove();
+                        if (data.indexOf("err") !== -1) {
+
+                            var html = "<tr><td id='err' colspan='6'>'A aparut o eroare!'</td></tr>";
+                            $('#result tr').first().after(html);
+                        }
+                        else if (data.indexOf("nous") !== -1) {
+                            var html = "<tr><td id='err' colspan='6'>'No Users!!'</td></tr>";
+                            $('#result tr').first().after(html);
+                        }
+                        else {
+
+                            var html = '';
+                            var size = Object.keys(d).length;
+                            for (var i = 0; i < size; i++) {
+
+                                html = "<tr>" +
+                                    "<td id='id'>" + d['record' + i].id + "</td>" +
+                                    "<td id='un1'>" + d['record' + i].username + "</td>" +
+                                    "<td id='eml'>" + d['record' + i].email + "</td>" +
+                                    "<td id='date'>" + d['record' + i].date + "</td>" +
+                                    "<td id='ban1'><span id='btxt'>" + d['record' + i].isBanned +
+                                    "</span></td>" +
+                                    "<td id='description1'>" + d['record' + i].reason + "</td>" +
+                                    "</tr>";
+
+                                $('#result tr').last().after(html);
+
+                            }
+                            getPagination('#result');
+
+                        }
+                    }
+                });
+
+
+            });
+        });
+        //stackoverflow solution !
+        function getPagination(table) {
+            $('.pagination').html('');
+            var trnum = 0;
+            var maxRows = 50;
+            var totalRows = $(table + ' tbody tr').length;
+            $(table + ' tr:gt(0)').each(function () {
+                trnum++;
+                if (trnum > maxRows) {
+
+                    $(this).hide();
+                }
+                if (trnum <= maxRows) {
+                    $(this).show();
+                }
+            });
+            if (totalRows > maxRows) {
+                var pagenum = Math.ceil(totalRows / maxRows);
+
+                for (var i = 1; i <= pagenum;) {
+                    $('.pagination').append('<li class="wp" data-page="' + i + '">\
+								      <span>' + i++ + '</span>\
+								    </li>').show();
+                }
+            }
+            $('.pagination li:first-child').addClass('active');
+            $('.pagination li').on('click', function () {
+                var pageNum = $(this).attr('data-page');
+                var trIndex = 0;
+                $('.pagination li').removeClass('active');
+                $(this).addClass('active');
+                $(table + ' tr:gt(0)').each(function () {
+                    trIndex++;
+
+                    if (trIndex > (maxRows * pageNum) || trIndex <= ((maxRows * pageNum) - maxRows)) {
+                        $(this).hide();
+                    } else {
+                        $(this).show();
+                    }
+                });
+            });
+
+        }
+
+
+
+
+
+
+    </script>
 </body>
+
 </html>

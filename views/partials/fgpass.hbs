@@ -1,34 +1,35 @@
- <div id="imgNews">
-<form action="/chPass" method="POST">
-{{#if wp}}
-<span style="color:red;  vertical-align:middle;  text-align: center; width: 100%; display: block;margin : 0 auto;" >Wrong current password! </span>
-{{else if sp}}
-<span style="color:red;  vertical-align:middle;  text-align: center; width: 100%; display: block;margin : 0 auto;" >Cannot be the same password! </span>
-{{else if erre}}
-<span style="color:red;  vertical-align:middle;  text-align: center; width: 100%; display: block;margin : 0 auto;" >Error inserting into DB </span>
-{{/if}}
+<div id="imgNews">
+  <form action="/chPass" method="POST">
+    {{#if wp}}
+    <span style="color:red;  vertical-align:middle;  text-align: center; width: 100%; display: block;margin : 0 auto;">Wrong current password! </span>
+    {{else if sp}}
+    <span style="color:red;  vertical-align:middle;  text-align: center; width: 100%; display: block;margin : 0 auto;">Cannot be the same password! </span>
+    {{else if erre}}
+    <span style="color:red;  vertical-align:middle;  text-align: center; width: 100%; display: block;margin : 0 auto;">Error inserting into DB </span>
+    {{/if}}
     <label for="currpassword">Current password:</label>
     <input type="password" id="currpassword" name="currpassword" placeholder="Current Password" required>
- <label for="password">New Password:</label>
-<input type="password" pattern=".{6,}" id="password" name="password" placeholder="Password"  required oninput="setCustomValidity(''); checkValidity(); setCustomValidity(validity.valid ? '' :'Minimum length is 6 characters!');" />
- <label for="password2">Re-type your new Password:</label>
-<input type="password" id="password2" name="password2" placeholder="Password" required>
-<script>var password = document.getElementById("password")
-, confirm_password = document.getElementById("password2");
+    <label for="password">New Password:</label>
+    <input type="password" pattern=".{6,}" id="password" name="password" placeholder="Password" required oninput="setCustomValidity(''); checkValidity(); setCustomValidity(validity.valid ? '' :'Minimum length is 6 characters!');"
+    />
+    <label for="password2">Re-type your new Password:</label>
+    <input type="password" id="password2" name="password2" placeholder="Password" required>
+    <script>var password = document.getElementById("password")
+        , confirm_password = document.getElementById("password2");
 
-function validatePassword(){
-if(password.value != confirm_password.value) {
-  confirm_password.setCustomValidity("Passwords Don't Match");
-} else {
-  confirm_password.setCustomValidity('');
-}
-}
+      function validatePassword() {
+        if (password.value != confirm_password.value) {
+          confirm_password.setCustomValidity("Passwords Don't Match");
+        } else {
+          confirm_password.setCustomValidity('');
+        }
+      }
 
-password.onchange = validatePassword;
-confirm_password.onkeyup = validatePassword;
-</script>
-<input type="image" id="registerBtn" src="/images/Button2.png" border="0" alt="Change Password" />
-</form>
+      password.onchange = validatePassword;
+      confirm_password.onkeyup = validatePassword;
+    </script>
+    <input type="image" id="registerBtn" src="/images/Button2.png" border="0" alt="Change Password" />
+  </form>
 
 
- </div>
+</div>

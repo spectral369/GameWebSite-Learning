@@ -1,55 +1,104 @@
 
-var config = function () {};
+var config = function () { };
 var df = require('./dataInfo.js');
 var bcrypt = require('bcrypt');
 var mongoose = require("mongoose");
 var moment = require('moment');
 var passport = require('passport')
-, LocalStrategy = require('passport-local').Strategy;
+  , LocalStrategy = require('passport-local').Strategy;
 mongoose.Promise = require('bluebird');
 var uniqueValidator = require('mongoose-unique-validator');
 //mongoose.connection.openUri("mongodb://localhost:27017/test3");
 config.passport = passport;
 var request = require('request');
 config.request = request;
+var options = {
+  keepAlive: 300000,
+  // connectTimeoutMS: 30000,
+  reconnectTries: Number.MAX_VALUE,
+  poolSize: 20,
 
-mongoose.connection.openUri('mongodb://'+df.mongoSite.username+':'+df.mongoSite.password+'@'+df.mongoSite.host+'/'+df.mongoSite.db+'?authSource=admin');
+  socketTimeoutMS: 480000,
+
+
+  // ssl: true,
+
+  sslValidate: false
+
+};
+var mongodUri = 'mongodb://' + df.mongoSite.username + ':' + df.mongoSite.password + '@127.0.0.1:27017/' + df.mongoSite.db + '?authSource=admin';
+mongoose.connect(mongodUri, options);
+
+//mongoose.connection.openUri('mongodb://'+df.mongoSite.username+':'+df.mongoSite.password+'@'+df.mongoSite.host+'/'+df.mongoSite.db+'?authSource=admin');
+
 const isReachable = require('is-reachable');
-config.isReachable =  isReachable;
+config.isReachable = isReachable;
 var CryptoJS = require("crypto-js");
+
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 config.AutoIncrement = AutoIncrement;
 var db = mongoose.connection;
+config.db = db;
+config.dberr = false;
+config.isRecovering = false;
+function dbReConn() {
+  mongoose.connect(mongodUri, options);
+  //mongoose.connection.openUri('mongodb://'+df.mongoSite.username+':'+df.mongoSite.password+'@'+df.mongoSite.host+'/'+df.mongoSite.db+'?authSource=admin');
+}
+db.on('disconnected', function () {
+  console.log('MongoDB disconnected!');
+  mongoose.disconnect();
+  config.dberr = true;
+  isRecovering = true;
+  setTimeout(dbReConn, 30000);
+});
 
-db.on("error", console.error.bind(console, "connection error"));
-db.once("open", function(callback) {
-     console.log("Connection succeeded.");
-   });
-   config.isMysql = true;
-   var Schema = mongoose.Schema;
+db.on('error', function (err) {
+  console.log('Mongoose default connection error(most likely mongod is down)' + err);
+  // mongoose.disconnect();
+  config.dberr = true;
+  isRecovering = true;
+  setTimeout(dbReConn, 30000);
+});
 
-   var userSchema = new Schema({
-    id:{type: Schema.Types.Number},
-    username: { type: Schema.Types.String,  required: true, trim: true, unique: true,ref: 'username'},
-    password:{type: Schema.Types.String},
-    email:{type: Schema.Types.String, trim: true,unique: true},
-   date: { type: Date, default: Date.now },
-   token: {type: String},
+db.on('connected', function () {
+  console.log('MongoDB connected!');
+  config.dberr = false;
+});
+
+db.once("open", function (callback) {
+  console.log("Connection succeeded.");
+  config.dberr = false;
+  if (config.isRecovering)
+    console.log(userSchema.authenticate());//test
+
+});
+
+config.isMysql = true;
+var Schema = mongoose.Schema;
+
+var userSchema = new Schema({
+  id: { type: Schema.Types.Number },
+  username: { type: Schema.Types.String, required: true, trim: true, unique: true, ref: 'username' },
+  password: { type: Schema.Types.String },
+  email: { type: Schema.Types.String, trim: true, unique: true },
+  date: { type: Date, default: Date.now },
+  token: { type: String },
   // tokenDate: {type: Date}
-  createDate: {type: Date,default:null},
-  admin:{type:Schema.Types.Boolean},
-  moderator:{type:Schema.Types.Boolean},
-  ban:{
-    isBanned:{type:Schema.Types.Boolean},
-    reason:{type:Schema.Types.String}
+  createDate: { type: Date, default: null },
+  admin: { type: Schema.Types.Boolean },
+  moderator: { type: Schema.Types.Boolean },
+  ban: {
+    isBanned: { type: Schema.Types.Boolean },
+    reason: { type: Schema.Types.String }
   }
- });
- 
+});
 
 
 
- userSchema.statics.authenticate = function (username, password, callback) {
-  User.findOne({ username: username})
+
+userSchema.statics.authenticate = function (username, password, callback) {
+  User.findOne({ username: username })
     .exec(function (err, user) {
       if (err) {
         return callback(err)
@@ -68,16 +117,16 @@ db.once("open", function(callback) {
     });
 }
 
-userSchema.methods.validPassword = function(password) {
+userSchema.methods.validPassword = function (password) {
   var user = this;
 
   return bcrypt.compareSync(password, user.password);
 };
 
 
- userSchema.pre('save', function (next) {
+userSchema.pre('save', function (next) {
   var user = this;
-  bcrypt.hash(user.password, 10, function (err, hash){
+  bcrypt.hash(user.password, 10, function (err, hash) {
     if (err) {
       return next(err);
     }
@@ -85,18 +134,18 @@ userSchema.methods.validPassword = function(password) {
     next();
   })
 });
- userSchema.plugin(AutoIncrement, {inc_field: 'id'});
- userSchema.plugin(uniqueValidator);
+userSchema.plugin(AutoIncrement, { inc_field: 'id' });
+userSchema.plugin(uniqueValidator);
 
- var UserData = mongoose.model("userData", userSchema)
- config.UserData = UserData;
- 
- passport.serializeUser(function(user, done) {
+var UserData = mongoose.model("userData", userSchema)
+config.UserData = UserData;
+
+passport.serializeUser(function (user, done) {
   done(null, user._id);
 });
-passport.deserializeUser(function(id, done) {
+passport.deserializeUser(function (id, done) {
 
-  UserData.findOne({ 'username': id }, function(err, user) {
+  UserData.findOne({ 'username': id }, function (err, user) {
     return done(err, user);
   });
 
@@ -106,7 +155,7 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 //function randomString (len) {
-    config.randomString = function (len,ip) {
+config.randomString = function (len, ip) {
   var buf = []
     , chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
     , charlen = chars.length;
@@ -114,7 +163,7 @@ function getRandomInt(min, max) {
   for (var i = 0; i < len; ++i) {
     buf.push(chars[getRandomInt(0, charlen - 1)]);
   }
-  var x  = CryptoJS.AES.encrypt(ip, 'Game$');
+  var x = CryptoJS.AES.encrypt(ip, 'Game$');
   buf.push('.');
   buf.push(x);
   return buf.join('');
@@ -126,209 +175,212 @@ passport.use(new LocalStrategy({
   // by default, local strategy uses username
   usernameField: 'inputUser',
   passwordField: 'inputPassword',
-  passReqToCallback : true
+  passReqToCallback: true
 },
-function(req, username, password, done) {
-  
+  function (req, username, password, done) {
 
-  // asynchronous
-  process.nextTick(function() {
-      UserData.findOne({ 'username' :  username }, function(err, user) {
-          // if there are any errors, return the error
-          if (err)
-              return done(err);
 
-          // if no user is found, return the message
-          if (!user)
-              return done(null, false, req.flash('loginMessage', 'No user found.'));
+    // asynchronous
+    process.nextTick(function () {
+      UserData.findOne({ 'username': username }, function (err, user) {
+        // if there are any errors, return the error
+        if (err)
+          return done(err);
 
-          if (!user.validPassword(password))
-              return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.'));
+        // if no user is found, return the message
+        if (!user)
+          return done(null, false, req.flash('loginMessage', 'No user found.'));
 
-          // all is well, return user
-          else
-              return done(null, user);
+        if (!user.validPassword(password))
+          return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.'));
+
+        // all is well, return user
+        else
+          return done(null, user);
       });
-  });
+    });
 
-}));
+  }));
 
-var mysql      = require('mysql');
+var mysql = require('mysql');
 config.mysql = mysql;
 
 //port??
 config.connection = mysql.createConnection({
-  host     : df.mysql.host,
-  user     : df.mysql.username,
-  password : df.mysql.password,
-  database : df.mysql.db,
-  port     : df.mysql.port
+  host: df.mysql.host,
+  user: df.mysql.username,
+  password: df.mysql.password,
+  database: df.mysql.db,
+  port: df.mysql.port
 });
 //needs testing...
 
-config.connection.connect(function(err) {
-  if(err){
-  console.log(err);
-  config.isMysql=false;
-  }else{
- console.log('conn...');
- config.isMysql=true;
+config.connection.connect(function (err) {
+  if (err) {
+    console.log('MySql server is Down !');
+    config.isMysql = false;
+  } else {
+    console.log('conn...');
+    config.isMysql = true;
   }
 });
+
 
 
 function test2(name) {
   // return is important - you're returning the promise which you will use later.
-  
-  return UserData.findOne({'token': name})
-      .then(function(user) {
-        if(user === null || user.token===null){
+
+  return UserData.findOne({ 'token': name })
+    .then(function (user) {
+      if (user === null || user.token === null) {
         return -1;
-         } else{
-         /* console.log('banned: '+user.ban.isBanned +' user: '+user.username);
-           if(user.ban.isBanned){
-           return 'banned';
-         
-            } else  */
-          return user.token;
-        }
-      })
-      .catch(function(err) {
-          console.log(err);
-      });
-  }
-  config.isAuthenticated = function (req,res,next) {
-//function isAuthenticated(req,res,next){
-  if(req.session.token!=undefined)
-  return  test2(req.session.token)
-  .then(function(token) {
-
-  
-     
-      var isLog = false;
-      if(req.session.token!= undefined || req.session.token===token){
-          isLog=true;
-      }
-      else if(req.cookies.remember_me === token){
-          isLog=true;
-      }
-     else if(token===-1 && req.session.token== undefined ){
-        isLog=false;
-      }
-    /* if(token==='banned'){
-      isLog=false;
-      req.session.isBanned=true;
-      console.log('first banned');
-      }*/
-     
-      return isLog
-  })  
-  else if(req.cookies.remember_me!=undefined)
-  return test2(req.cookies.remember_me)
-  .then(function(token) {
-   
-      var isLog = false;
-      if(req.session.token!= undefined && req.session.token===token){
-          isLog=true;
-      }
-      else if(req.cookies.remember_me === token){
-          isLog=true;
-      }
-     else if(token===-1 && req.session.token== undefined  ){
-        isLog=false;
-      }
-     /* if(token==='banned'){
-        isLog=false;
-        req.session.isBanned=true;
-        console.log('2nd banned');
+      } else {
+        /* console.log('banned: '+user.ban.isBanned +' user: '+user.username);
+          if(user.ban.isBanned){
+          return 'banned';
         
-        }*/
-      if(isLog && req.session.token === undefined){
-        console.log('inside renew token');
-      
-///test
-
-return UserData.findOne({ 'token' : token}, function(err, user) {
-  // if there are any errors, return the error
-  if (err)
-      return done('admin err: '+err);
-
-      var ip = req.headers['x-forwarded-for'] || 
-      req.connection.remoteAddress || 
-      req.socket.remoteAddress ||
-      (req.connection.socket ? req.connection.socket.remoteAddress : null);
-      req.session.token = config.randomString(64,ip);
-
-     var t  =  moment(user.createDate).add(30,'days');
-     console.log(t.calendar());
-     console.log(moment(Date.now()).calendar());
-     var secondsDiff = t.diff(Date.now(), 'seconds');
-      if(secondsDiff<=0){
-        console.log('cookie expired!');
-        res.clearCookie('remember_me');
-        res.redirect('/');
+           } else  */
+        return user.token;
       }
-      console.log(secondsDiff);
-     console.log(' diff: '+secondsDiff/ 86400);
-     ///why is the name of Clam Lord  maxAge is in milliseconds ???/????
-      res.cookie('remember_me', req.session.token,{ path: '/', httpOnly: true, expires:new Date(Date.now() + secondsDiff), maxAge:(secondsDiff*1000.0)});
-
-
-
-
-    var a = req.session.token.split('.');
-      var bytes  = CryptoJS.AES.decrypt(a[1].toString(), 'Game$');
-      var plaintext = bytes.toString(CryptoJS.enc.Utf8);
-    var b = user.token.split(".");
-    var bytes1  = CryptoJS.AES.decrypt(b[1].toString(), 'Game$');
-    var plaintext1 = bytes.toString(CryptoJS.enc.Utf8);
-    
-    req.session.user = user.username;
-
-    if(plaintext!=plaintext1){
-    isLog=false;
-    res.clearCookie('remember_me');
-    }
-    else{
-   
-
-      console.log('reenter: '+user.moderator);
-      req.session.admin = user.admin;
-      req.session.moderator = user.moderator;
-      
-      UserData.update({'token': token}, {
-        'token':req.session.token,
-    }, function(err, numberAffected, rawResponse) {
-       if(err)
-       console.log('err '+err);
-       console.log('renew token saved');
     })
-  }
-      return isLog//check
-});
+    .catch(function (err) {
+      console.log(err);
+    });
+}
+config.isAuthenticated = function (req, res, next) {
+  //function isAuthenticated(req,res,next){
+  if (req.session.token != undefined)
+    return test2(req.session.token)
+      .then(function (token) {
 
-     
 
-      //return isLog
-      
-      }
-    
-     
-  })
+        console.log('session only!!!!!!: ');
+        var isLog = false;
+        if (req.session.token != undefined || req.session.token === token) {
+          isLog = true;
+
+        }
+        else if (req.cookies.remember_me === token) {
+          isLog = true;
+        }
+        else if (token === -1 && req.session.token == undefined) {
+          isLog = false;
+        }
+
+        return isLog;
+
+      })
+  else if (req.cookies.remember_me != undefined)
+    return test2(req.cookies.remember_me)
+      .then(function (token) {
+
+        var isLog = false;
+        if (req.session.token != undefined && req.session.token === token) {
+          isLog = true;
+        }
+        else if (req.cookies.remember_me === token) {
+          isLog = true;
+        }
+        else if (token === -1 && req.session.token == undefined) {
+          isLog = false;
+        }
+        /* if(token==='banned'){
+           isLog=false;
+           req.session.isBanned=true;
+           console.log('2nd banned');
+           
+           }*/
+        if (isLog && req.session.token === undefined) {
+          console.log('inside renew token');
+
+          ///test
+
+          return UserData.findOne({ 'token': token }, function (err, user) {
+            // if there are any errors, return the error
+            if (err)
+              return done('admin err: ' + err);
+
+            var ip = req.headers['x-forwarded-for'] ||
+              req.connection.remoteAddress ||
+              req.socket.remoteAddress ||
+              (req.connection.socket ? req.connection.socket.remoteAddress : null);
+            req.session.token = config.randomString(64, ip);
+
+            var t = moment(user.createDate).add(30, 'days');
+            console.log(t.calendar());
+            console.log(moment(Date.now()).calendar());
+            var secondsDiff = t.diff(Date.now(), 'seconds');
+            if (secondsDiff <= 0) {
+              console.log('cookie expired!');
+              res.clearCookie('remember_me');
+              res.redirect('/');
+            }
+            console.log(secondsDiff);
+            console.log(' diff: ' + secondsDiff / 86400);
+            ///why is the name of Clam Lord  maxAge is in milliseconds ???/????
+            res.cookie('remember_me', req.session.token, { path: '/', httpOnly: true, expires: new Date(Date.now() + secondsDiff), maxAge: (secondsDiff * 1000.0) });
+
+
+
+
+            var a = req.session.token.split('.');
+            var bytes = CryptoJS.AES.decrypt(a[1].toString(), 'Game$');
+            var plaintext = bytes.toString(CryptoJS.enc.Utf8);
+            var b = user.token.split(".");
+            var bytes1 = CryptoJS.AES.decrypt(b[1].toString(), 'Game$');
+            var plaintext1 = bytes.toString(CryptoJS.enc.Utf8);
+
+            req.session.user = user.username;
+
+            if (plaintext != plaintext1) {
+              isLog = false;
+              res.clearCookie('remember_me');
+            }
+            else {
+
+
+              console.log('reenter: ' + user.moderator);
+              req.session.admin = user.admin;
+              req.session.moderator = user.moderator;
+
+              UserData.update({ 'token': token }, {
+                'token': req.session.token,
+              }, function (err, numberAffected, rawResponse) {
+                if (err)
+                  console.log('err ' + err);
+                console.log('renew token saved');
+              })
+            }
+            return isLog//check
+          });
+
+
+
+          //return isLog
+
+        }
+
+
+      })
   else
-  return  test2(req.cookies.remember_me)
-  .then(function(token) {
-      return false
-  })    
+    return test2(req.cookies.remember_me)
+      .then(function (token) {
+        return false
+      })
 }
 
-
+/*
 process.on('ECONNREFUSED', (reason, p) => {
-  console.log('ECONNREFUSED: Promise', p, 'reason:', reason);
+ // console.log('ECONNREFUSED: Promise', p, 'reason:', reason);
+ console.log('mysql down...');
   // application specific logging, throwing an error, or other logic here
+});*/
+process.on('ECONNREFUSED', function (err) {
+  console.log('mysql is down !');
 });
 process.on('unhandledRejection', (reason, p) => {
-  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
-  // application specific logging, throwing an error, or other logic here
+  //only for debugging....
+  //console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+
 });
 module.exports = config;

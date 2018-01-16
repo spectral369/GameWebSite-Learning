@@ -1,252 +1,379 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <link rel="stylesheet" type="text/css" href="/stylesheets/admin.css">
-   <!--<link href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" rel="stylesheet">-->
+    <link rel="stylesheet" type="text/css" href="/stylesheets/admin.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{{title}}</title>
 </head>
+
 <body>
-<div id="he"><button type="button" id="bb" onclick="javascript:history.back()">&#8592;</button> </div>
-<div id="he1"><h1 id="ht">Admin Panel</h1></div>
-<br>
-<input type="text" id="search" placeholder="Cauta dupa username!">
-<input type="button" id="ser" value="Search">
-<table id="result">
-<tr>
-    <th id="id">ID</th>
-    <th id="un">Username</th>
-    <th id="eml">Email</th>
-    <th id="date">Register Date</th>
-    <th id="ban">Ban</th>
-    <th id="description">Description</th>
-</tr>
-</table>
+    <div id="he">
+        <button type="button" id="bb" onclick="javascript:history.back()">&#8592;</button>
+    </div>
+    <div id="he1">
+        <h1 id="ht">Admin Panel</h1>
+    </div>
+    <br>
+    <input type="text" id="search" placeholder="Cauta dupa username!">
+    <input type="button" id="ser" value="Search">
+    <input type="button" id="all" value="Show all" placeholder="It may take a while">
+    <table id="result">
+        <tr>
+            <th id="id">ID</th>
+            <th id="un">Username</th>
+            <th id="eml">Email</th>
+            <th id="date">Register Date</th>
+            <th id="ban">Ban</th>
+            <th id="description">Description</th>
+        </tr>
+    </table>
+    <div id="pag">
+        <nav>
+            <ul class="pagination"></ul>
+        </nav>
+    </div>
 
 
-<div id="overlay">
-     <div id="head">
-          <p style="padding-bottom:10px;">Are you Sure you want to ban this user?! </p>
-          <p>
-              <textarea  id="area" rows="10" cols="30" placeholder="Motivul ban-ului cu lungimea de minumum 20 caractere!">
+    <div id="overlay">
+        <div id="head">
+            <p style="padding-bottom:10px;">Are you Sure you want to ban this user?! </p>
+            <p>
+                <textarea id="area" rows="10" cols="30" placeholder="Motivul ban-ului cu lungimea de minumum 20 caractere!">
 </textarea>
 
-          
-          
-          </p>
-          <!-- <a href='#' onclick='overlay()'>OK</a>-->
-          <div id="ok"><button id="btnOk" value="ok" disabled>OK</button></div>
-      <div id="close"> <button id="btnClose" value="close" onclick="overlay()">Close</button></div>
-     </div>
-</div>
-
-<div id="dialog-confirm" title="Unban this user?">
-  <p ><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Are you sure you want to unban this user ?</p>
-</div>
 
 
-<script type="text/javascript">
+            </p>
+            <!-- <a href='#' onclick='overlay()'>OK</a>-->
+            <div id="ok">
+                <button id="btnOk" value="ok" disabled>OK</button>
+            </div>
+            <div id="close">
+                <button id="btnClose" value="close" onclick="overlay()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="dialog-confirm" title="Unban this user?">
+        <p>
+            <span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Are you sure you want to unban this user ?</p>
+    </div>
 
 
-$(document).ready(function(){
-$('#ser').click(function(){
-  
-    var searchTxt =  $('#search').val();
-   
-    if(searchTxt ===''){
-        return;
-    }else{
-    
-        $.ajax({
-    url: '/admin/ser',
-    type: 'POST',
-    data: JSON.stringify({
-                       txt:searchTxt
-                }),
-    datatype: "json", 
-     contentType: 'application/json; charset=utf-8',
-    success: function(data) {
-       var d = JSON.parse(data);
-   $('#result tr').not(':first').remove();
-       if(data.indexOf("err") !== -1){
-       
-                  var  html ="<tr><td id='err' colspan='6'>'A aparut o eroare!'</td></tr>";
-  $('#result tr').first().after(html);
-            }
-            else if(data.indexOf("nous") !== -1){
-                     var  html ="<tr><td id='err' colspan='6'>'Userul nu a fost gasit!!'</td></tr>";
-  $('#result tr').first().after(html);
-            }
-            else{
-      
-                               var html = '';
- 
-     html +="<tr>"+
-    "<td id='id'>"+d.id+"</td>"+
-    "<td id='un1'>"+d.username+"</td>"+
-    "<td id='eml'>"+d.email+"</td>"+
-    "<td id='date'>"+d.rdate+"</td>"+
-    "<td id='ban1'><span id='btxt'>"+d.ban.isBanned+
-        "</span><div id='btnSel'><select id='sel'>"+
-       "<option value='No'>No</option>"+
-       "<option value='Yes'>Yes</option>"+
-        "</div></td>"+
-    "<td id='description1'>"+d.ban.reason+"</td>"+
-"</tr>";
-  
-$('#result tr').first().after(html);
-if(d.ban.isBanned===true){
-  
- $("#sel option[value='Yes']").prop('selected', true);
-}
-else{
- $("#sel option[value='No']").prop('selected', true);
-
-}
+    <script type="text/javascript">
 
 
-  
-            }
-            
-    }
+
+
+
+        $(document).ready(function () {
+            $('#ser').click(function () {
+
+                var searchTxt = $('#search').val();
+
+                if (searchTxt === '') {
+                    return;
+                } else {
+
+                    $.ajax({
+                        url: '/admin/ser',
+                        type: 'POST',
+                        data: JSON.stringify({
+                            txt: searchTxt
+                        }),
+                        datatype: "json",
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            var d = JSON.parse(data);
+                            $('#result tr').not(':first').remove();
+                            if (data.indexOf("err") !== -1) {
+
+                                var html = "<tr><td id='err' colspan='6'>'A aparut o eroare!'</td></tr>";
+                                $('#result tr').first().after(html);
+                            }
+                            else if (data.indexOf("nous") !== -1) {
+                                var html = "<tr><td id='err' colspan='6'>'Userul nu a fost gasit!!'</td></tr>";
+                                $('#result tr').first().after(html);
+                            }
+                            else {
+
+                                var html = '';
+
+                                html += "<tr>" +
+                                    "<td id='id'>" + d.id + "</td>" +
+                                    "<td id='un1'>" + d.username + "</td>" +
+                                    "<td id='eml'>" + d.email + "</td>" +
+                                    "<td id='date'>" + d.rdate + "</td>" +
+                                    "<td id='ban1'><span id='btxt'>" + d.ban.isBanned +
+                                    "</span><div id='btnSel'><select id='sel'>" +
+                                    "<option value='No'>No</option>" +
+                                    "<option value='Yes'>Yes</option>" +
+                                    "</div></td>" +
+                                    "<td id='description1'>" + d.ban.reason + "</td>" +
+                                    "</tr>";
+
+                                $('#result tr').first().after(html);
+                                if (d.ban.isBanned === true) {
+
+                                    $("#sel option[value='Yes']").prop('selected', true);
+                                }
+                                else {
+                                    $("#sel option[value='No']").prop('selected', true);
+
+                                }
+
+
+
+                            }
+
+                        }
+                    });
+                }
+            });
         });
-    }
-});
-});
 
 
 
-$('body').on( "change", "#sel", function() {
-    var name = $('#sel').find(":selected").text();
-       
-        if(name==='Yes'){
-        overlay();
-        } else{
-       $("#dialog-confirm").css("visibility", "visible");
-        $( function() {
-    $( "#dialog-confirm" ).dialog({
-      resizable: false,
-      height: "auto",
-      width: 400,
-      modal: true,
-      buttons: {
-        "Unban!": function() {
-         doFunctionForYes();
-           $( this ).dialog( "close" );
-        },
-        Cancel: function() {
-          $( this ).dialog( "close" );
-           var va = $('#ban1').text();
-    if(va.indexOf("true") !== -1){
- $("#sel option[value='Yes']").prop('selected', true);
-}
-else{
- $("#sel option[value='No']").prop('selected', true);
+        $('body').on("change", "#sel", function () {
+            var name = $('#sel').find(":selected").text();
 
-}
+            if (name === 'Yes') {
+                overlay();
+            } else {
+                $("#dialog-confirm").css("visibility", "visible");
+                $(function () {
+                    $("#dialog-confirm").dialog({
+                        resizable: false,
+                        height: "auto",
+                        width: 400,
+                        modal: true,
+                        buttons: {
+                            "Unban!": function () {
+                                doFunctionForYes();
+                                $(this).dialog("close");
+                            },
+                            Cancel: function () {
+                                $(this).dialog("close");
+                                var va = $('#ban1').text();
+                                if (va.indexOf("true") !== -1) {
+                                    $("#sel option[value='Yes']").prop('selected', true);
+                                }
+                                else {
+                                    $("#sel option[value='No']").prop('selected', true);
+
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+        });
+
+        $('#btnClose').click(function () {
+
+            var va = $('#ban1').text();
+            if (va.indexOf("true") !== -1) {
+                $("#sel option[value='Yes']").prop('selected', true);
+            }
+            else {
+                $("#sel option[value='No']").prop('selected', true);
+
+            }
+
+
+        });
+        $('#area').bind('input propertychange', function () {
+            if (($('#area').val().trim().length > 20)) {
+                $('#btnOk').prop('disabled', false);
+            }
+            else {
+                $('#btnOk').prop('disabled', true);
+            }
+
+        });
+
+
+        $('#btnOk').click(function () {
+            var va = $('#ban1').text();
+            if (va.indexOf("true") !== -1) {
+                alert('User Already Banned !');
+
+                $('area').val('');
+                overlay();
+            } else {
+
+                var user = $('#un1').text();
+                var desc = $('#area').val();
+
+
+                $.ajax({
+                    url: '/admin/ban',
+                    type: 'POST',
+                    data: JSON.stringify({
+                        un: user,
+                        reason: desc
+                    }),
+                    datatype: "json",
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        var b = JSON.parse(data);
+                        if (b.success) {
+                            $('#btxt').text('true');
+                            $('#description1').text(b.reason);
+
+                        }
+                    }
+                });
+                overlay();//needs testing....
+                $('area').val('');
+            }
+        });
+
+        function doFunctionForYes() {
+            var user = $('#un1').text();
+            $.ajax({
+
+                url: '/admin/unban',
+                type: 'POST',
+                data: JSON.stringify({
+                    un: user,
+                }),
+                datatype: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    var b = JSON.parse(data);
+                    if (b === 'success')
+                        $('#btxt').text('false');
+                    $('area').val('');
+
+                }
+            });
         }
-      }
-    });
-  } );
-        }    
-});
-
-$('#btnClose').click(function(){
-    
-      var va = $('#ban1').text();
-    if(va.indexOf("true") !== -1){
- $("#sel option[value='Yes']").prop('selected', true);
-}
-else{
- $("#sel option[value='No']").prop('selected', true);
-
-}
-
-
-});
-$('#area').bind('input propertychange', function() {
-if (($('#area').val().trim().length > 20)) {
-    $('#btnOk').prop('disabled', false);
-}
-else{
-     $('#btnOk').prop('disabled', true);
-}
-
-});
-
-
-$('#btnOk').click(function(){
-  var va = $('#ban1').text();
-    if(va.indexOf("true") !== -1){
-    alert('User Already Banned !');
-    
-    $('area').val('');
-  overlay();
-}else{
-    
-     var user = $('#un1').text();
-    var desc = $('#area').val();
-
-   
-    $.ajax({
-    url: '/admin/ban',
-    type: 'POST',
-    data: JSON.stringify({
-                       un:user,
-                       reason:desc
-                }),
-    datatype: "json", 
-     contentType: 'application/json; charset=utf-8',
-    success: function(data) {
-         var b = JSON.parse(data);
-  if(b.success){
-        $('#btxt').text('true');
-        $('#description1').text(b.reason);
-     
-  }
-    }
-    });
-    overlay();//needs testing....
-    $('area').val('');
-}
-});
-
-function doFunctionForYes() {
-       var user = $('#un1').text();
-   $.ajax({
-     
-    url: '/admin/unban',
-    type: 'POST',
-    data: JSON.stringify({
-                       un:user, 
-                }),
-    datatype: "json", 
-     contentType: 'application/json; charset=utf-8',
-    success: function(data) {
-         var b = JSON.parse(data);
-        if(b==='success')
-        $('#btxt').text('false');
-   $('area').val('');
-
-    }
-    });
-}
 
 
 
 
-function overlay() {
-	el = document.getElementById("overlay");
-	el.style.visibility = (el.style.visibility == "visible") ? "hidden" : "visible";
-}
+        function overlay() {
+            el = document.getElementById("overlay");
+            el.style.visibility = (el.style.visibility == "visible") ? "hidden" : "visible";
+        }
+        //new test
+        $(document).ready(function () {
+            $('#all').click(function () {
+                $.ajax({
+                    url: '/admin/getall',
+                    type: 'POST',
+                    datatype: "json",
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
 
-</script>
+                        var d = JSON.parse(data);
+                        //alert(d[0]);
+
+                        $('#result tr').not(':first').remove();
+                        if (data.indexOf("err") !== -1) {
+
+                            var html = "<tr><td id='err' colspan='6'>'A aparut o eroare!'</td></tr>";
+                            $('#result tr').first().after(html);
+                        }
+                        else if (data.indexOf("nous") !== -1) {
+                            var html = "<tr><td id='err' colspan='6'>'No Users!!'</td></tr>";
+                            $('#result tr').first().after(html);
+                        }
+                        else {
+
+                            var html = '';
+                            var size = Object.keys(d).length;
+                            for (var i = 0; i < size; i++) {
+
+                                html = "<tr>" +
+                                    "<td id='id'>" + d['record' + i].id + "</td>" +
+                                    "<td id='un1'>" + d['record' + i].username + "</td>" +
+                                    "<td id='eml'>" + d['record' + i].email + "</td>" +
+                                    "<td id='date'>" + d['record' + i].date + "</td>" +
+                                    "<td id='ban1'><span id='btxt'>" + d['record' + i].isBanned +
+                                    "</span><div id='btnSel'><select id='sel'>" +
+                                    "<option value='No'>No</option>" +
+                                    "<option value='Yes'>Yes</option>" +
+                                    "</div></td>" +
+                                    "<td id='description1'>" + d['record' + i].reason + "</td>" +
+                                    "</tr>";
+
+                                $('#result tr').last().after(html);
+                                if (d['record' + i].isBanned === true) {
+
+                                    $("#sel option[value='Yes']").prop('selected', true);
+                                }
+                                else {
+                                    $("#sel option[value='No']").prop('selected', true);
+
+                                }
+                            }
+                            getPagination('#result');
+
+                        }
+                    }
+                });
+
+
+            });
+        });
+        //stackoverflow solution !
+        function getPagination(table) {
+            $('.pagination').html(''); // reset pagination 
+            var trnum = 0; // reset tr counter 
+            var maxRows = 50; // get Max Rows from select option
+            var totalRows = $(table + ' tbody tr').length; // numbers of rows 
+            $(table + ' tr:gt(0)').each(function () { // each TR in  table and not the header
+                trnum++; // Start Counter 
+                if (trnum > maxRows) { // if tr number gt maxRows
+
+                    $(this).hide(); // fade it out 
+                }
+                if (trnum <= maxRows) {
+                    $(this).show();
+                } // else fade in Important in case if it ..
+            }); //  was fade out to fade it in 
+            if (totalRows > maxRows) { // if tr total rows gt max rows option
+                var pagenum = Math.ceil(totalRows / maxRows); // ceil total(rows/maxrows) to get ..  
+                //	numbers of pages 
+                for (var i = 1; i <= pagenum;) { // for each page append pagination li 
+                    $('.pagination').append('<li class="wp" data-page="' + i + '">\
+								      <span>' + i++ + '</span>\
+								    </li>').show();
+                } // end for i 
+            } // end if row count > max rows
+            $('.pagination li:first-child').addClass('active'); // add active class to the first li 
+            $('.pagination li').on('click', function () { // on click each page
+                var pageNum = $(this).attr('data-page'); // get it's number
+                var trIndex = 0; // reset tr counter
+                $('.pagination li').removeClass('active'); // remove active class from all li 
+                $(this).addClass('active'); // add active class to the clicked 
+                $(table + ' tr:gt(0)').each(function () { // each tr in table not the header
+                    trIndex++; // tr index counter 
+                    // if tr index gt maxRows*pageNum or lt maxRows*pageNum-maxRows fade if out
+                    if (trIndex > (maxRows * pageNum) || trIndex <= ((maxRows * pageNum) - maxRows)) {
+                        $(this).hide();
+                    } else {
+                        $(this).show();
+                    } //else fade in 
+                }); // end of for each tr in table
+            }); // end of on click pagination list
+
+        }
+
+
+
+
+
+    </script>
 </body>
+
 </html>

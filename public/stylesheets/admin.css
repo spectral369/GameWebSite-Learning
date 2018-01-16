@@ -17,7 +17,7 @@
     text-align: center;
 
 }
-#ser{
+#ser,#all{
     width: 10%;
     display: inline-block;
     color: RGB(23,65,76);
@@ -103,4 +103,17 @@ column-span: all;
 
 #dialog-confirm{
     visibility: hidden;
+}
+#un1{
+    width:max-content;
+}
+.pagination,.wp{
+    display: inline-block;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+.active{
+    color: RGB(23,65,76);
+    text-decoration: underline;
+    text-shadow:5px 5px 10px black;
 }

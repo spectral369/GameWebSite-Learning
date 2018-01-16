@@ -527,16 +527,11 @@ input:checked + .slider:before {
 }
 
 
-#un{
-
+#logName{
  text-align: center;
  width: 100%;
  color: #83be4c;
  font-size: 16px;
  padding-top: 6px;
  padding-right: 6px;
-
-
-
-
 }
