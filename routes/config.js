@@ -74,6 +74,82 @@ db.once("open", function (callback) {
 
 });
 
+
+
+
+///new
+
+config.topics={};
+var db2;
+mongoose.createConnection('mongodb://'+df.mongoSite.username+':'+df.mongoSite.password+'@'+df.mongoSite.host+'/nodebb?authSource=admin', (err, database) => {
+   if (err) return console.log(err)
+   db2 = database
+
+   db2.collection('objects').find({uid:1,title:/ /}).sort({timestamp:-1}).limit(3).toArray(function(err, results) {
+      if (err) return console.log(err)
+      //console.log(results)
+
+      config.topics[0] = {
+        title:results[0].title,
+      partial:"http://localhost:4567/topic/"+results[0].slug,
+      }
+      if(results[1]!=undefined){
+      config.topics[1] = {
+        title:results[1].title,
+        partial:"http://localhost:4567/topic/"+results[1].slug
+        }
+      }else{
+        config.topics[1] = {
+             title : "Post 2",
+             partial:"/"
+        }
+        }
+      if(results[2]!=undefined){
+      config.topics[2] = {title:results[2].title,
+        partial:"http://localhost:4567/topic/"+results[2].slug
+        }
+      }else{
+        config.topics[2] = {
+             title : "Post 3",
+             partial:"/"
+        }
+        }
+      console.log(config.topics);
+      
+   })
+   db2.close();
+})
+
+config.reconnectForPosts = function() {
+  mongoose.createConnection('mongodb://'+df.mongoSite.username+':'+df.mongoSite.password+'@'+df.mongoSite.host+'/nodebb?authSource=admin', (err, database) => {
+    if (err) return console.log(err);
+    console.log('connected ...');
+
+  return database;
+
+});
+}
+
+config.reCon = function delay() {
+  // `delay` returns a promise
+  return new Promise(function(resolve, reject) {
+    // Only `delay` is able to resolve or reject the promise
+    mongoose.createConnection('mongodb://'+df.mongoSite.username+':'+df.mongoSite.password+'@'+df.mongoSite.host+'/nodebb?authSource=admin', (err, database) => {
+      if (err) return console.log(err);
+      console.log('connected ...');
+  
+   resolve(database);
+  
+  });
+  });
+}
+
+
+
+
+
+//new
+
 config.isMysql = true;
 var Schema = mongoose.Schema;
 

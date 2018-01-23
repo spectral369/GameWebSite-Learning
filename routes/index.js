@@ -23,18 +23,23 @@ router.get('/', function (req, res, next) {
             usern: req.session.user,
             anyArray: [1, 2, 3],
             admin: req.session.admin,
-            moderator: req.session.moderator
+            moderator: req.session.moderator,
+            post1:conf.topics[0],
+            post2:conf.topics[1],
+            post3:conf.topics[2],
 
           });
         } else {
           if (req.session.badLogin === undefined)
             req.session.badLogin = false;
-          console.log('here stuff ' + req.session.badLogin)
           res.render('index', {
             title: 'GameWebSite',
             condition: false,
             anyArray: [1, 2, 3],
-            userNotFound: req.session.badLogin
+            userNotFound: req.session.badLogin,
+            post1:conf.topics[0],
+            post2:conf.topics[1],
+            post3:conf.topics[2],
 
           });
         }
@@ -235,9 +240,9 @@ router.get('/update', function (req, res, next) {
       if (!conf.isMysql) {
         conf.connection = conf.mysql.createConnection({
           host: 'localhost',
-          user: 'root',
-          password: '4dark',
-          database: 'sames'
+          user: 'username',
+          password: 'password',
+          database: 'dbname'
         });
       }
       conf.connection.on('error', function (err) {

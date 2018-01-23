@@ -24,6 +24,7 @@
     <input type="text" id="search" placeholder="Cauta dupa username!">
     <input type="button" id="ser" value="Search">
     <input type="button" id="all" value="Show all" placeholder="It may take a while">
+    <input type="button" id="upPosts" value="Update Posts">
     <table id="result">
         <tr>
             <th id="id">ID</th>
@@ -369,7 +370,32 @@
 
         }
 
+//new 
 
+  $(document).ready(function () {
+          $('#upPosts').click(function () {
+                     $.ajax({
+                    url: '/admin/upPost',
+                    type: 'POST',
+                    datatype: "json",
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+
+                    
+                        /// var d = JSON.parse(data);
+                         alert(data);
+
+                    }
+                     });
+                   // alert('clicked!');
+        var btn = $(this);
+    btn.prop('disabled', true);
+    setTimeout(function(){
+        btn.prop('disabled', false);
+    }, 60*1000);
+          });
+
+  });
 
 
 
