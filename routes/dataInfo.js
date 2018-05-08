@@ -2,17 +2,17 @@
 var dataInfo = function () { };
 
 var mongoSite = {
-    username: 'username',
-    password: 'password',
+    username: 'root',
+    password: '4dark',
     host: 'localhost',
-    db: 'dbname'
+    db: 'website'
 }
 dataInfo.mongoSite = mongoSite;
 var mysql = {
-    username: 'username',
-    password: 'password',
+    username: 'root',
+    password: '4dark',
     host: 'localhost',
-    db: 'dbname',
+    db: 'sames',
     port: 3306
 }
 dataInfo.mysql = mysql;

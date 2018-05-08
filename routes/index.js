@@ -240,9 +240,9 @@ router.get('/update', function (req, res, next) {
       if (!conf.isMysql) {
         conf.connection = conf.mysql.createConnection({
           host: 'localhost',
-          user: 'username',
-          password: 'password',
-          database: 'dbname'
+          user: 'root',
+          password: '4dark',
+          database: 'sames'
         });
       }
       conf.connection.on('error', function (err) {
